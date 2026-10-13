@@ -15,9 +15,23 @@ const schema_type = {
             allowNull: false
         }
     },
-    int(){
+    int(default_value?: any){
         return {
             type: DataTypes.INTEGER,
+            allowNull: false,
+            ...(default_value !== undefined && { defaultValue: default_value })
+        }
+    },
+    bigint(default_value?: any){
+        return {
+            type: DataTypes.BIGINT,
+            allowNull: false,
+            ...(default_value !== undefined && { defaultValue: default_value })
+        }
+    },
+    decimal(precision: number, scale: number){
+        return {
+            type: DataTypes.DECIMAL(precision, scale),
             allowNull: false
         }
     },

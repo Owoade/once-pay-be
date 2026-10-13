@@ -33,4 +33,6 @@ class CacheRepo {
     }
 }
 
-export default new CacheRepo();
+const cache_repo = new CacheRepo()
+
+export default cache_repo;

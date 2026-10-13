@@ -1,12 +1,5 @@
 import axios from 'axios';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-const PLUNK_API_KEY = process.env.PLUNK_API_KEY;
-const PLUNK_SENDER_EMAIL = process.env.PLUNK_SENDER_EMAIL;
-
-console.log({PLUNK_API_KEY, PLUNK_SENDER_EMAIL})
+import { PLUNK_API_KEY, PLUNK_SENDER_EMAIL } from 'src/env';
 
 export const email_service = {
     async send_email(to: string, subject: string, body: string) {
