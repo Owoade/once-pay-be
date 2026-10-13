@@ -1,0 +1,59 @@
+# Google Authentication Implementation: SMOOTH-BALLOT-BE
+
+This document explains the implementation of the Google OAuth 2.0 flow used for user authentication and signup.
+
+## 1. Flow Overview
+The project implements the **OAuth 2.0 Authorization Code Flow**. The process is split into two main phases: generating the authorization request and verifying the callback code.
+
+## 2. Detailed Technical Process
+
+### Phase A: Initiation (Authorization Request)
+**Method**: `get_google_auth_url()` in `AuthenticationService`
+1. The backend constructs a URL pointing to `https://accounts.google.com/o/oauth2/v2/auth`.
+2. **Parameters used**:
+   - `client_id`: From environment variables.
+   - `redirect_uri`: The URL Google should redirect to after the user consents.
+   - `response_type`: Set to `code` (requesting an authorization code).
+   - `scope`: Requests access to `userinfo.profile` and `userinfo.email`.
+   - `prompt`: Set to `consent` to ensure the user sees the consent screen.
+
+### Phase B: Verification (Callback Handling)
+**Method**: `verify_google_auth(code: string)` in `AuthenticationService`
+
+1. **Token Exchange**:
+   The backend makes a server-to-server POST request to `https://oauth2.googleapis.com/token` with:
+   - The `code` received from the frontend/callback.
+   - `client_id` and `client_secret`.
+   - `grant_type: 'authorization_code'`.
+   - **Result**: An `access_token` is returned.
+
+2. **User Profile Retrieval**:
+   The backend makes a GET request to `https://www.googleapis.com/oauth2/v3/userinfo` using the `access_token` in the Authorization header.
+   - **Result**: A JSON object containing the user's `email`, `name`, and other profile data.
+
+3. **User Provisioning**:
+   - **Email Normalization**: The email is converted to lowercase.
+   - **Existing User**: If the email exists in the database, the user's profile is updated.
+   - **New User**: If the email is not found:
+     - A new user record is created.
+     - A default password (`SSO_PASSWORD`) is hashed and stored to satisfy database requirements.
+     - The `signup_channel` is set to `"google"`.
+     - A notification is sent to the admin via Telegram.
+
+4. **Session Creation**:
+   Once the user is identified or created, the backend signs a JWT token using the user's ID and returns it to the frontend.
+
+## 3. Key Components
+- **Controller**: `UserController` (handles the `/auth/google` and `/auth/google-auth` endpoints).
+- **Service**: `AuthenticationService` (handles the logic for URL generation and token verification).
+- **Dependencies**:
+  - `axios`: For communicating with Google APIs.
+  - `jwt`: For creating the session token.
+  - `bcryptjs`: For hashing the default password for new SSO users.
+  - `TelegramNotificationService`: For admin alerts on new signups.
+
+## 4. Environment Variables Required
+- `GOOGLE_CLIENT_ID`: The application ID from Google Cloud Console.
+- `GOOGLE_CLIENT_SECRET`: The application secret from Google Cloud Console.
+- `GOOGLE_REDIRECT_URI`: The authorized redirect URL.
+- `SSO_PASSWORD`: A system-wide password used for OAuth-created accounts.

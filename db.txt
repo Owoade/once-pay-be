@@ -1,0 +1,70 @@
+# Database Communication Architecture: SMOOTH-BALLOT-BE (Sequelize/PostgreSQL)
+
+This document explains how the backend interacts with the PostgreSQL database using the Sequelize ORM.
+
+## 1. Connection & Configuration
+The database connection is initialized in `src/db/postgres/index.ts`.
+- **Sequelize Instance**: A single `Sequelize` instance is created using environment variables (host, port, user, password, database).
+- **SSL**: Configured for non-production environments to ensure secure connections to the database.
+- **Logging**: Custom logging is implemented to print SQL queries to the console, with a safety check that throws an error if a `DROP TABLE` command is detected to prevent accidental data loss.
+
+## 2. Schema Definition (The "Source of Truth")
+The project uses a custom **Schema-First** approach located in `src/db/postgres/schema/`, powered by a utility in `src/utils/schema.ts`.
+
+### How the Schema Utility Works:
+Instead of defining models directly as Sequelize classes, the project uses a `schema_type` helper object to generate column configurations:
+
+- **Base Types**: Helpers like `string()`, `int()`, `boolean()`, and `primary_key()` return standard Sequelize attribute objects (e.g., `{ type: DataTypes.STRING, allowNull: false }`).
+- **Modifiers**:
+    - `optional(type)`: Wraps a base type and sets `allowNull: true`.
+    - `unique(type)`: Sets `unique: true`.
+- **Shorthands**: Provides quick access to common types like `optional_string()` or `optional_int()`.
+- **Specialized Types**: Includes PostgreSQL-specific types like `jsonb()` and `decimal(precision, scale)`.
+
+### Full Schema Definition Pattern:
+Each entity is defined in its own file within `src/db/postgres/schema/` following a consistent pattern:
+
+1. **The Schema Object**: A plain JavaScript object where keys are column names and values are the result of `schema_type` helpers.
+2. **The Table Name Constant**: An exported constant that explicitly defines the physical table name in PostgreSQL (usually pluralized and quoted in the DB).
+
+**Example (`contest-category.ts`):**
+```typescript
+import schema_type from "@utils/schema";
+
+export const ContestCategorySchema = {
+    id: schema_type.primary_key(),
+    ContestId: schema_type.int(),
+    name: schema_type.string(),
+    createdAt: schema_type.date(),
+    updatedAt: schema_type.date()
+}
+
+export const CONTEST_CATEGORY_TABLE_NAME = "ContestCategories";
+```
+
+This approach decouples the logical definition of the data structure from the Sequelize implementation, ensuring consistency across the application.
+
+
+## 3. Migrations
+Database changes are handled via a migration-based system found in `src/db/postgres/migrations/`.
+- **File Naming**: Migrations are timestamped (e.g., `20240531221401-create-candidate.js`) to ensure they are executed in the correct order.
+- **Content**: Each migration file typically contains `up` and `down` functions to apply and revert changes to the database schema.
+- **Safety**: The `db._sync` wrapper prevents the use of `force: true` during synchronization to protect existing production data.
+
+## 4. Data Access Layer (Repositories)
+The project follows the **Repository Pattern**. Data logic is encapsulated in `repo.ts` files within each module (e.g., `src/modules/contest/repo.ts`).
+
+### A. Model Injection
+Models are injected into repositories using NestJS dependency injection. They are provided via custom providers defined in `model.ts` files, utilizing an `InferedSchemaType` to ensure type safety between the schema definition and the repository.
+
+### B. Querying Patterns
+The repositories use three primary ways to communicate with the database:
+
+1.  **Sequelize Abstractions**: Using high-level methods like `.findOne()`, `.findAll()`, `.create()`, and `.update()`. These are used for standard CRUD operations.
+2.  **Complex Aggregations**: Utilizing `Sequelize.fn`, `Sequelize.col`, and `Sequelize.literal` for advanced SQL features (e.g., `SUM`, `COUNT`, and PostgreSQL-specific `FILTER` clauses for soft-delete handling).
+3.  **Raw SQL Queries**: For maximum performance or complex logic that exceeds the ORM's capabilities, `sequelize.query()` is used.
+    - **Security**: Always uses `replacements` (bind parameters) to prevent SQL injection.
+    - **Type Control**: Uses `QueryTypes.SELECT` to ensure results are returned as plain objects.
+
+## 5. Summary Flow
+`Env Vars` $\rightarrow$ `db/postgres/index.ts` (Connection) $\rightarrow$ `db/postgres/schema` (Definitions) $\rightarrow$ `db/postgres/migrations` (Schema Updates) $\rightarrow$ `modules/*/repo.ts` (Queries/Business Logic) $\rightarrow$ `Database`
