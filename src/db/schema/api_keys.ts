@@ -6,5 +6,5 @@ export const ApiKeysSchema = {
     id: schema_type.primary_key(),
     merchant_id: schema_type.int(),
     key_id: schema_type.string(),
-    key: schema_type.string(), // This will store the hash of the API key
+    key: schema_type.string(), // This will store the encrypted API key (iv:tag:ciphertext)
 };

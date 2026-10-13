@@ -16,6 +16,7 @@ const env_validator = Joi.object({
   KORAPAY_SECRET_KEY: Joi.string().required(),
   MONIFY_API_KEY: Joi.string().required(),
   MONIFY_SECRET_KEY: Joi.string().required(),
+  MERCHANT_API_KEY_ENCRYPTION_SECRET: Joi.string().required(),
 }).unknown(true);
 
 const { error, value: env } = env_validator.validate(process.env);
@@ -36,4 +37,5 @@ export const FLUTTERWAVE_SECRET_KEY = env.FLUTTERWAVE_SECRET_KEY;
 export const KORAPAY_SECRET_KEY = env.KORAPAY_SECRET_KEY;
 export const MONIFY_API_KEY = env.MONIFY_API_KEY;
 export const MONIFY_SECRET_KEY = env.MONIFY_SECRET_KEY;
+export const MERCHANT_API_KEY_ENCRYPTION_SECRET = env.MERCHANT_API_KEY_ENCRYPTION_SECRET;
 

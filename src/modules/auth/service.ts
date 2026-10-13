@@ -126,7 +126,7 @@ class AuthService {
         return { data: { message: 'Password changed successfully' } };
     }
 
-    verify_token(token: string) {
+    verify_token(token: string): any {
         try {
             return jwt.verify(token, JWT_SECRET!);
         } catch {

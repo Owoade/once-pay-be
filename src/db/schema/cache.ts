@@ -10,4 +10,4 @@ export const CacheSchema = {
     updatedAt: schema_type.date()
 };
 
-export const CACHE_TABLE_NAME = 'Cache';
+export const CACHE_TABLE_NAME = 'cache';
