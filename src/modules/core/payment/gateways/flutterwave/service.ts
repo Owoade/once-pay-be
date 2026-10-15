@@ -10,7 +10,10 @@ class FlutterwaveService implements PaymentService {
     private base_url = "https://api.flutterwave.com/v3";
     private secret_key = FLUTTERWAVE_SECRET_KEY;
 
-    constructor() {}
+    constructor() {
+        this.initiate_transaction = this.initiate_transaction.bind(this);
+        this.verify_transaction = this.verify_transaction.bind(this);
+    }
 
     async initiate_transaction(payload: InitiateTransaction): Promise<ServiceMethodReturnType<InitiateTransactionResponse>> {
         try {
@@ -20,7 +23,7 @@ class FlutterwaveService implements PaymentService {
                     tx_ref: payload.internal_trx_reference,
                     amount: payload.amount,
                     currency: "NGN",
-                    redirect_url: `${BACKEND_BASE_URL}/transaction/${this.provider_name}/${payload.internal_trx_reference}`,
+                    redirect_url: `${BACKEND_BASE_URL}/transaction/callback/${this.provider_name}/${payload.internal_trx_reference}`,
                     customer: {
                         email: payload.email
                     },
@@ -67,7 +70,7 @@ class FlutterwaveService implements PaymentService {
     async verify_transaction(key: string): Promise<ServiceMethodReturnType<VerifyTransactionResponse>> {
         try {
             const axios_response = await axios.get(
-            `${this.base_url}/transactions/${key}/verify`,
+            `${this.base_url}/transactions/verify_by_reference?tx_ref=${key}`,
             {
                 headers: {
                     "Authorization": `Bearer ${this.secret_key}`,
@@ -106,3 +109,6 @@ class FlutterwaveService implements PaymentService {
         }
     }
 }
+
+const flutterwave_service = new FlutterwaveService();
+export default flutterwave_service;

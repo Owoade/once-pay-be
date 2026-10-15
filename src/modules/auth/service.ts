@@ -10,6 +10,8 @@ import { email_service } from '@modules/core/email/plunk';
 import { ChangePassword } from './type';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI, JWT_SECRET, SSO_PASSWORD } from 'src/env';
 import merchant_service from '@modules/merchant/service';
+import db from '@db/index';
+import { Transaction } from 'sequelize';
 
 dotenv.config();
 
@@ -60,13 +62,24 @@ class AuthService {
             return { error: { code: 400, message: 'Invalid OTP payload' } };
         }
         merchant.auth_channel = "email-password";
-
-        const new_merchant = await merchant_repo.create(merchant);
         
-        cache_repo.delete(otp);
-        merchant_service.generate_api_key(new_merchant.id);
+        const transaction = await db.transaction();
 
-        return { data: { message: 'OTP verified successfully' } };
+        try {
+            const new_merchant = await merchant_repo.create(merchant, transaction);
+            
+            cache_repo.delete(otp);
+            await merchant_service.generate_api_key(new_merchant.id, transaction);
+            await transaction.commit();
+
+            return { data: { message: 'OTP verified successfully' } };
+        }
+        catch(e){
+            console.error(e)
+            await transaction.rollback();
+            return { error: { code: 500, message: 'Failed to verify OTP' } };
+        }
+
     }
 
     async login(payload: Pick<MerchantModelInterface, 'email' | 'password'>)
@@ -153,6 +166,7 @@ class AuthService {
     }
 
     async verify_google_auth(code: string): Promise<ServiceMethodReturnType<{ token: string, name: string }>> {
+        let transaction: Transaction | null = null
         try {
             const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
                 code,
@@ -175,18 +189,25 @@ class AuthService {
 
             if (!merchant) {
                 const hashed_sso_password = await bcrypt.hash(SSO_PASSWORD, 10);
+                transaction = await db.transaction();
+                
                 merchant = await merchant_repo.create({
                     name: googleUser.name,
                     email: email,
                     password: hashed_sso_password,
                     auth_channel: 'google'
-                } as any);
+                } as any, transaction);
+
+                await merchant_service.generate_api_key(merchant.id, transaction);
+                await transaction.commit();
             }
 
             const token = jwt.sign({ id: (merchant as any).id }, JWT_SECRET!, { expiresIn: '7d' });
-
             return { data: { token, name: merchant.name } };
+
         } catch (error: any) {
+            console.error(error);
+            if (transaction) await transaction.rollback();
             return { error: { code: 500, message: error.message || 'Google Auth failed' } };
         }
     }

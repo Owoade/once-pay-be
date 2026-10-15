@@ -17,7 +17,8 @@ class TransactionRepo {
     }
 
     async update(filter: Partial<TransactionInterface>, payload: Partial<TransactionInterface>) {
-        return await transaction_model.update(payload, { where: filter });
+        const updated_trx = await transaction_model.update(payload, { where: filter, returning: true });
+        return updated_trx?.[1]?.[0]?.toJSON();
     }
 }
 

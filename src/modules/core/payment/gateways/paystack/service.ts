@@ -3,6 +3,7 @@ import { PaymentService } from "../../base";
 import { InitiateTransaction, InitiateTransactionResponse, VerifyTransactionResponse } from "../../type";
 import { ServiceMethodReturnType } from "@utils/type";
 import axios from "axios";
+import { PaystackTransaction } from "./type";
 
 class PaystackService implements PaymentService {
     
@@ -10,9 +11,13 @@ class PaystackService implements PaymentService {
     private secret_key = PAYSTACK_SECRET_KEY;
     private provider_name = "paystack";
 
-    constructor() {}
+    constructor() {
+        this.initiate_transaction = this.initiate_transaction.bind(this);
+        this.verify_transaction = this.verify_transaction.bind(this);   
+    }
 
     async initiate_transaction(payload: InitiateTransaction): Promise<ServiceMethodReturnType<InitiateTransactionResponse>> {
+        console.log({sk: this.secret_key})
         try {
         const axios_response = await axios.post(
             `${this.base_url}/transaction/initialize`,
@@ -20,7 +25,7 @@ class PaystackService implements PaymentService {
                 email: payload.email,
                 amount: payload.amount,
                 reference: payload.internal_trx_reference,
-                callback_url: `${BACKEND_BASE_URL}/transaction/${this.provider_name}/${payload.internal_trx_reference}`,
+                callback_url: `${BACKEND_BASE_URL}/transaction/callback/${this.provider_name}/${payload.internal_trx_reference}`,
                 ...(payload.metadata ? { metadata: payload.metadata } : {})
             },
             {
@@ -53,6 +58,7 @@ class PaystackService implements PaymentService {
        
         }
         catch (err: any) {
+            console.error(err)
             return {
                 error: {
                     code: 400,

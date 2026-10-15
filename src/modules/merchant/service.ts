@@ -3,12 +3,14 @@ import merchant_repo from './repo.js';
 import { ApiKeyInterface } from './type.js';
 import { ServiceMethodReturnType } from '@utils/type.js';
 import { MERCHANT_API_KEY_ENCRYPTION_SECRET } from 'src/env/index.js';
+import { Transaction } from 'sequelize';
 
 class MerchantService {
     constructor() {}
 
     private encrypt(text: string): string {
-        const iv = crypto.randomBytes(12);
+        console.log({MERCHANT_API_KEY_ENCRYPTION_SECRET})
+        const iv = crypto.randomBytes(16);
         const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(MERCHANT_API_KEY_ENCRYPTION_SECRET), iv);
 
         let encrypted = cipher.update(text, 'utf8', 'hex');
@@ -37,7 +39,7 @@ class MerchantService {
         return decrypted;
     }
 
-    async generate_api_key(merchant_id: number) {
+    async generate_api_key(merchant_id: number, transaction: Transaction) {
         const key_id = crypto.randomBytes(4).toString('hex');
         const secret = crypto.randomBytes(32).toString('hex');
 
@@ -50,7 +52,7 @@ class MerchantService {
             key: encrypted_key,
         } as ApiKeyInterface;
 
-        await merchant_repo.create_api_key(payload);
+        await merchant_repo.create_api_key(payload, transaction);
 
         return {
             api_key_id: key_id,

@@ -95,7 +95,7 @@ abstract class ServiceDecorator {
           });
         }
 
-        response.locals.merchant_id = payload.merchant_id;
+        response.locals.merchant_id = payload.id;
 
         return original_method.apply(this, args);
       };
@@ -107,53 +107,66 @@ abstract class ServiceDecorator {
   };
 }
   static forMerchantApiKeyValidation() {
-    return function (
-      target: any,
-      propertyKey: string,
-      descriptor: PropertyDescriptor
-    ) {
-      const value = descriptor?.value;
+    return function <T extends new (...args: any[]) => any>(target: T) {
+      for (const propertyKey of Object.getOwnPropertyNames(target.prototype)) {
+        if (propertyKey === "constructor") continue;
 
-      descriptor.value = async function (...args: [Request, Response]) {
-        const [request, response] = args;
+        const descriptor = Object.getOwnPropertyDescriptor(
+          target.prototype,
+          propertyKey
+        );
 
-        const auth_header = request.headers["Authorization"] as string;
+        if (!descriptor || typeof descriptor.value !== "function") continue;
 
-        if (!auth_header.startsWith("Bearer")) {
-          return respond(response, {
-            status: "error",
-            status_code: 401,
-            data: {},
-            message: "Missing merchant API key",
-          });
-        }
+        const original_method = descriptor.value;
 
-        const apiKey = auth_header.split(" ")[1];
-        if (!apiKey) {
-          return respond(response, {
-            status: "error",
-            status_code: 401,
-            data: {},
-            message: "Missing merchant API key",
-          });
-        }
+        descriptor.value = async function (...args: [Request, Response]) {
+          const [request, response] = args;
 
-        const {error, data} = await merchant_service.verify_api_key(apiKey);
-        if(error){
-          return respond(response, {
-            status: "error",
-            status_code: 401,
-            data: {},
-            message: error.message,
-          });
-        }
+          if (request.url?.includes("/transaction/callback")) {
+            return original_method.apply(this, args);
+          }
 
-        response.locals.merchant_id = data!.merchant_id;
+          const auth_header = request.headers.authorization;
 
-        const result = await value.apply(this, args);
-        return result;
-      };
+          if (!auth_header?.startsWith("Bearer ")) {
+            return respond(response, {
+              status: "error",
+              status_code: 401,
+              data: {},
+              message: "Missing merchant API key",
+            });
+          }
 
+          const apiKey = auth_header.split(" ")[1];
+          if (!apiKey) {
+            return respond(response, {
+              status: "error",
+              status_code: 401,
+              data: {},
+              message: "Missing merchant API key",
+            });
+          }
+
+          const { error, data } = await merchant_service.verify_api_key(apiKey);
+          if (error) {
+            return respond(response, {
+              status: "error",
+              status_code: 401,
+              data: {},
+              message: error.message,
+            });
+          }
+
+          response.locals.merchant_id = data!.merchant_id;
+
+          return original_method.apply(this, args);
+        };
+
+        Object.defineProperty(target.prototype, propertyKey, descriptor);
+      }
+
+      return target;
     };
   }
 }

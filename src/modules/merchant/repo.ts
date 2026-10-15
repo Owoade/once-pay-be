@@ -1,11 +1,12 @@
+import { Transaction } from 'sequelize';
 import { merchant_model, api_keys_model } from './model.js';
 import MerchantModelInterface, { ApiKeyInterface } from './type.js';
 
 class MerchantRepo {
     constructor() {}
 
-    async create(payload: MerchantModelInterface) {
-        return (await merchant_model.create(payload))?.toJSON();
+    async create(payload: MerchantModelInterface, transaction: Transaction) {
+        return (await merchant_model.create(payload, {transaction}))?.toJSON();
     }
 
     async find<T extends keyof MerchantModelInterface>(filter: Partial<MerchantModelInterface>, attributes?: T[]) {
@@ -29,8 +30,8 @@ class MerchantRepo {
         else return apiKey?.toJSON() as ApiKeyInterface;
     }
 
-    async create_api_key(payload: ApiKeyInterface) {
-        return (await api_keys_model.create(payload))?.toJSON();
+    async create_api_key(payload: ApiKeyInterface, transaction: Transaction) {
+        return (await api_keys_model.create(payload, {transaction}))?.toJSON();
     }
 
     async delete_api_key(filter: Partial<ApiKeyInterface>) {

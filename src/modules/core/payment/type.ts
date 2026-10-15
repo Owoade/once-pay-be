@@ -12,6 +12,6 @@ export interface InitiateTransactionResponse {
 
 export interface VerifyTransactionResponse {
     status: string;
-    raw_transaction_response: any;
+    raw_transaction_response: any
 }
 

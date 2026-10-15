@@ -6,12 +6,15 @@ import { ServiceMethodReturnType } from "@utils/type";
 import { InitiateTransaction, InitiateTransactionResponse, VerifyTransactionResponse } from "../../type";
 
 class MonifyService implements PaymentService {
-    private base_url = "https://sandbox.monnify.com/api/"
+    private base_url = "https://sandbox.monnify.com/api"
     private api_key = MONIFY_API_KEY
     private secret_key = MONIFY_SECRET_KEY
     private provider_name = "monify"
 
-    constructor() {}
+    constructor() {
+        this.initiate_transaction = this.initiate_transaction.bind(this);
+        this.verify_transaction = this.verify_transaction.bind(this);
+    }
 
     async initiate_transaction(payload: InitiateTransaction): Promise<ServiceMethodReturnType<InitiateTransactionResponse>> {
         const {data: access_token, error} = await this.get_access_token();
@@ -29,7 +32,7 @@ class MonifyService implements PaymentService {
                     customerEmail: payload.email,
                     paymentReference: payload.internal_trx_reference,
                     currencyCode: "NGN",
-                    redirectUrl: `${BACKEND_BASE_URL}/transaction/${this.provider_name}/${payload.internal_trx_reference}`,
+                    redirectUrl: `${BACKEND_BASE_URL}/transaction/callback/${this.provider_name}/${payload.internal_trx_reference}`,
                 },
                 {
                     headers: {
@@ -37,7 +40,7 @@ class MonifyService implements PaymentService {
                     }
                 }
             );
-
+            
             const monify_response = response.data;
             if (!monify_response.requestSuccessful) {
                 return {
@@ -50,6 +53,13 @@ class MonifyService implements PaymentService {
 
             const monify_response_data = monify_response.responseBody;
 
+            console.log( {
+                data: {
+                    payment_link: monify_response_data.checkoutUrl,
+                    transaction_reference: payload.internal_trx_reference
+                }
+            })
+
             return {
                 data: {
                     payment_link: monify_response_data.checkoutUrl,
@@ -59,6 +69,7 @@ class MonifyService implements PaymentService {
 
         }
         catch (err: any) {
+            console.error(err);
             return {
                 error: {
                     code: 400,

@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import db from '@db/index.js';
 import auth_router from '@modules/auth/routes';
 import merchant_router from '@modules/merchant/router';
+import merchant_api_router from '@modules/merchant-api/route';
 import '@modules/core/customer/model';
 import '@modules/core/transaction/model';
 import '@modules/merchant/model';
@@ -11,10 +12,11 @@ app.use(express.json());
 
 const PORT = 3000;
 
+app.use('/', merchant_api_router);
 app.use('/auth', auth_router);
 app.use('/merchant', merchant_router);
 
-async function startServer() {
+async function start_server() {
     try {
         await db.sync();
         console.log('Database synchronized.');
@@ -26,4 +28,4 @@ async function startServer() {
     }
 }
 
-startServer();
+start_server();

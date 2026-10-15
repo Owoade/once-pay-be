@@ -10,7 +10,10 @@ class KorapayService implements PaymentService {
     private provider_name = "korapay";
     private notification_url = "https://once-pay-api.owoade.dev/webhook/korapay"
 
-    constructor() {}
+    constructor() {
+        this.initiate_transaction = this.initiate_transaction.bind(this);
+        this.verify_transaction = this.verify_transaction.bind(this);
+    }
 
     async initiate_transaction(payload: InitiateTransaction): Promise<ServiceMethodReturnType<InitiateTransactionResponse>> {
         try {
@@ -25,7 +28,7 @@ class KorapayService implements PaymentService {
                         email: payload.email,
                     },
                     notification_url: this.notification_url,   
-                    redirect_url: `${BACKEND_BASE_URL}/transaction/${this.provider_name}/${payload.internal_trx_reference}`,
+                    redirect_url: `${BACKEND_BASE_URL}/transaction/callback/${this.provider_name}/${payload.internal_trx_reference}`,
                 },
                 {
                     headers: {
@@ -93,8 +96,8 @@ class KorapayService implements PaymentService {
 
             return {
                 data: {
-                status: korapay_response_data.status,
-                raw_transaction_response: korapay_response_data
+                    status: korapay_response_data.status,
+                    raw_transaction_response: korapay_response_data
                 }
             };
         }
