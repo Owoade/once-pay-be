@@ -17,7 +17,6 @@ class PaystackService implements PaymentService {
     }
 
     async initiate_transaction(payload: InitiateTransaction): Promise<ServiceMethodReturnType<InitiateTransactionResponse>> {
-        console.log({sk: this.secret_key})
         try {
         const axios_response = await axios.post(
             `${this.base_url}/transaction/initialize`,

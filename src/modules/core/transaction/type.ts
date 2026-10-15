@@ -6,7 +6,7 @@ export interface TransactionInterface {
   merchant_id: number;
   reference: string;
   amount: number;
-  payment_gateway: "paystack" | "flutterwave" | "korapay" | "monnify" | "squadco";
+  payment_gateway: "paystack" | "flutterwave" | "korapay" | "monnify" | "seerbit";
   payment_gateway_trx_id?: string;
   customer_id: number;
   status: "successful" | "pending" | "failed";
@@ -14,7 +14,7 @@ export interface TransactionInterface {
   payment_gateway_create_trx_response?: string;
   payment_gateway_webhook_response?: string;
   initiated_at_ms: number;
-  resolved_at_secs?: number;
+  resolved_in_secs?: number;
   payment_made_at_ms?: number;
   webhook_retry_count: number;
   trx_sync_attempt: number;

@@ -17,7 +17,8 @@ const env_validator = Joi.object({
   MONIFY_API_KEY: Joi.string().required(),
   MONIFY_SECRET_KEY: Joi.string().required(),
   MERCHANT_API_KEY_ENCRYPTION_SECRET: Joi.string().required(),
-  SQUAD_CO_SECRET_KEY: Joi.string().required(),
+  SEERBIT_PUBLIC_KEY: Joi.string().required(),
+  SEERBIT_SECRET_KEY: Joi.string().required(),
 }).unknown(true);
 
 
@@ -40,5 +41,6 @@ export const KORAPAY_SECRET_KEY = env.KORAPAY_SECRET_KEY;
 export const MONIFY_API_KEY = env.MONIFY_API_KEY;
 export const MONIFY_SECRET_KEY = env.MONIFY_SECRET_KEY;
 export const MERCHANT_API_KEY_ENCRYPTION_SECRET = env.MERCHANT_API_KEY_ENCRYPTION_SECRET;
-export const SQUAD_CO_SECRET_KEY = env.SQUAD_CO_SECRET_KEY;
+export const SEERBIT_PUBLIC_KEY = env.SEERBIT_PUBLIC_KEY;
+export const SEERBIT_SECRET_KEY = env.SEERBIT_SECRET_KEY;
 

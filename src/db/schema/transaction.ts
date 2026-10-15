@@ -16,7 +16,7 @@ export const TransactionSchema = {
     payment_gateway_create_trx_response: schema_type.optional(() => schema_type.text()),
     payment_gateway_webhook_response: schema_type.optional(() => schema_type.text()),
     initiated_at_ms: schema_type.bigint(),
-    resolved_at_secs: schema_type.optional(() => schema_type.int()),
+    resolved_in_secs: schema_type.optional(() => schema_type.int()),
     payment_made_at_ms: schema_type.optional(() => schema_type.optional(() => schema_type.int())),
     webhook_retry_count: schema_type.int(0),
     trx_sync_attempt: schema_type.int(0),

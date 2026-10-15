@@ -5,6 +5,7 @@ import { ServiceMethodReturnType } from "@utils/type";
 import { InitiateTransactionResponse } from "@modules/core/payment/type";
 import { TransactionInterface } from "@modules/core/transaction/type";
 import cache_repo from "@modules/core/cache/repo";
+import customer_repo from "@modules/core/customer/repo";
 
 class MerchantApiService {
     constructor(){}
@@ -47,7 +48,38 @@ class MerchantApiService {
             return { error: response.error };
         }
 
+        const customer = await customer_repo.find({id: response.data!.customer_id}, ['id', 'email']);
+
+        (response.data! as any).customer = customer;
+
         return { data: response.data };
+
+    }
+
+    async verify_transaction(filter: Pick<TransactionInterface, 'reference' | 'merchant_id'>): Promise<ServiceMethodReturnType<TransactionInterface>> {
+        const response = await transaction_service.verify_transaction({
+            reference: filter.reference,
+            merchant_id: filter.merchant_id
+        });
+
+        if(response.error){
+            return { error: response.error };
+        }
+
+        const customer = await customer_repo.find({id: response.data!.customer_id}, ['id', 'email']);
+
+        (response.data! as any).customer = customer;
+
+        return { data: response.data };
+    }
+
+    sanitize_transaction(transaction: TransactionInterface): Partial<TransactionInterface> {
+        const sanitized_transaction = { ...transaction } as Partial<TransactionInterface>;
+        delete sanitized_transaction.merchant_id;
+        delete sanitized_transaction.customer_id;
+        delete sanitized_transaction.trx_sync_attempt;
+        delete sanitized_transaction.webhook_retry_count;
+        return sanitized_transaction;
     }
 }
 

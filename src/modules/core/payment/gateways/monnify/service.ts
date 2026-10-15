@@ -53,13 +53,6 @@ class MonifyService implements PaymentService {
 
             const monify_response_data = monify_response.responseBody;
 
-            console.log( {
-                data: {
-                    payment_link: monify_response_data.checkoutUrl,
-                    transaction_reference: payload.internal_trx_reference
-                }
-            })
-
             return {
                 data: {
                     payment_link: monify_response_data.checkoutUrl,

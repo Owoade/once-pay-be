@@ -9,7 +9,6 @@ class MerchantService {
     constructor() {}
 
     private encrypt(text: string): string {
-        console.log({MERCHANT_API_KEY_ENCRYPTION_SECRET})
         const iv = crypto.randomBytes(16);
         const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(MERCHANT_API_KEY_ENCRYPTION_SECRET), iv);
 

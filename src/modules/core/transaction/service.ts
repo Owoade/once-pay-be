@@ -2,8 +2,8 @@ import { ServiceMethodReturnType } from "@utils/type";
 import flutterwave_service from "../payment/gateways/flutterwave/service";
 import korapay_service from "../payment/gateways/korapay/service";
 import monnify_service from "../payment/gateways/monnify/service";
+import seerbit_service from "../payment/gateways/seerbit/service";
 import paystack_service from "../payment/gateways/paystack/service";
-import squadco_service from "../payment/gateways/squadco/service";
 import { ProcessTransaction, PaymentProcessors, TransactionInterface, TransactionStatus } from "./type";
 import { InitiateTransactionResponse } from "../payment/type";
 import transaction_repo from "./repo";
@@ -16,7 +16,7 @@ class TransactionService {
         "paystack": paystack_service,
         "korapay": korapay_service,
         "monnify": monnify_service,
-        "squadco": squadco_service
+        "seerbit": seerbit_service
     }
 
     private successful_trx_status: TransactionStatus = {
@@ -24,7 +24,7 @@ class TransactionService {
         'paystack': "success",
         'korapay': "success",
         'monnify': "PAID",
-        'squadco': "Success"
+        'seerbit': "00"
     }
 
     constructor() {}   
@@ -40,8 +40,6 @@ class TransactionService {
             internal_trx_reference: trx_reference,
             ...(payload.metadata && { metadata: payload.metadata })
         });
-
-        console.log({response})
 
         const { error, data: payment_data } = response;
 
@@ -68,7 +66,7 @@ class TransactionService {
 
     }
 
-    async verify_transaction(filter: Partial<TransactionInterface> & { payment_gateway: TransactionInterface["payment_gateway"] })
+    async verify_transaction(filter: Partial<TransactionInterface>)
     : Promise<ServiceMethodReturnType<TransactionInterface>>{
 
         const existing_trx = await transaction_repo.find(filter);
@@ -87,14 +85,14 @@ class TransactionService {
             };
         }
 
-        const payment_processor = this.processors[filter.payment_gateway];
+        const payment_processor = this.processors[existing_trx.payment_gateway];
         const { error, data } = await payment_processor.verify_transaction(existing_trx.reference);
 
         if(error){
             return { error };
         }
 
-        const payment_gateway_successful_trx_status = this.successful_trx_status[filter.payment_gateway];
+        const payment_gateway_successful_trx_status = this.successful_trx_status[existing_trx.payment_gateway];
         const payment_gateway_trx_status = data!.status;
         const TRANSACTION_IS_SUCCESSFUL = payment_gateway_successful_trx_status === payment_gateway_trx_status;
         const payment_gateway_trx = data!.raw_transaction_response;
@@ -103,7 +101,7 @@ class TransactionService {
 
         if(existing_trx.status !== 'successful' && TRANSACTION_IS_SUCCESSFUL){
             update_payload.status = 'successful';
-            update_payload.resolved_at_secs = Math.floor((Date.now() - parseInt(existing_trx.initiated_at_ms as any)) / 1000);
+            update_payload.resolved_in_secs = Math.floor((Date.now() - parseInt(existing_trx.initiated_at_ms as any)) / 1000);
         }
             
 
