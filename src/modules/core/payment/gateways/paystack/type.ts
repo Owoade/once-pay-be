@@ -87,3 +87,8 @@ interface TransactionCustomer {
   risk_action: string;
   international_format_phone: string | null;
 }
+
+export interface PaystackWebhookPayload {
+  event: "charge.success" | (string & {});
+  data: PaystackTransaction;
+}

@@ -42,3 +42,13 @@ export type MonnifyPaymentMethod =
   | "ACCOUNT_TRANSFER"
   | "CARD"
   | "USSD";
+
+export type MonnifyEventType =
+  | "SUCCESSFUL_TRANSACTION"
+  | "FAILED_TRANSACTION"
+  | (string & {});
+
+export interface MonnifyWebhookPayload {
+  eventType: MonnifyEventType;
+  eventData: MonnifyTransaction;
+}

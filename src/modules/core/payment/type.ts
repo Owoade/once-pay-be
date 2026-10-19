@@ -15,3 +15,12 @@ export interface VerifyTransactionResponse {
     raw_transaction_response: any
 }
 
+export type WebhookEventName = "successful_transaction" | "failed_transaction" | "unrecognized_event";
+
+export interface ResolveWebhookResponse {
+    event: WebhookEventName;
+    status: string;
+    reference: string;
+    raw_webhook_request: any;
+}
+

@@ -1,8 +1,9 @@
 import { BACKEND_BASE_URL, FLUTTERWAVE_SECRET_KEY } from "src/env";
 import { PaymentService } from "../../base";
-import { InitiateTransaction, InitiateTransactionResponse, VerifyTransactionResponse } from "../../type";
+import { InitiateTransaction, InitiateTransactionResponse, ResolveWebhookResponse, VerifyTransactionResponse } from "../../type";
 import { ServiceMethodReturnType } from "@utils/type";
-import axios, { AxiosError, AxiosResponse } from "axios";
+import { FlutterwaveWebhookPayload } from "./type";
+import axios from "axios";
 
 class FlutterwaveService implements PaymentService {
 
@@ -52,7 +53,7 @@ class FlutterwaveService implements PaymentService {
 
             return {
                 data: {
-                    transaction_reference: flutterwave_response_data.tx_ref,
+                    transaction_reference: payload.internal_trx_reference,
                     payment_link: flutterwave_response_data.link
                 }
             };
@@ -92,6 +93,8 @@ class FlutterwaveService implements PaymentService {
 
             const flutterwave_response_data = flutterwave_response.data;
 
+            console.log({flutterwave_response_data})
+
             return {
                 data: {
                     status: flutterwave_response_data.status,
@@ -100,13 +103,37 @@ class FlutterwaveService implements PaymentService {
             };
         }
         catch (err: any) {
+            console.log({err_message: err.response?.data.message ?? err.response.message});
             return {
                 error: {
                     code: 400,
-                    message: err.response.data.message ?? err.response.message
+                    message: err.response?.data.message ?? err.response.message
                 }
             }
         }
+    }
+
+    resolve_webhook(payload: FlutterwaveWebhookPayload): ServiceMethodReturnType<ResolveWebhookResponse> {
+        const status = (payload as any).status ?? payload?.data?.status;
+        const reference = (payload as any).txRef ?? payload?.data?.tx_ref;
+
+        if (!status || !reference) {
+            return {
+                error: {
+                    code: 400,
+                    message: "Invalid flutterwave webhook payload"
+                }
+            };
+        }
+
+        return {
+            data: {
+                event: status === "successful" ? "successful_transaction" : "failed_transaction",
+                status,
+                reference,
+                raw_webhook_request: payload
+            }
+        };
     }
 }
 

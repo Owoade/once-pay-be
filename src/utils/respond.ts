@@ -7,7 +7,7 @@ export default function respond( res: Response, config: IConfig ){
     res.status( status_code )
     res.json({
         status,
-        message: message ?? "Operation successsfull",
+        message: message ?? "Operation successful",
         data,
         current_time: moment().toISOString()
     })

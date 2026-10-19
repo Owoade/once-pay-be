@@ -8,6 +8,7 @@ import {
 } from "@validators/auth";
 import auth_service from "./service";
 import respond from "@utils/respond";
+import { FRONTEND_URL } from "src/env";
 
 export class AuthController {
     constructor(){}
@@ -143,9 +144,47 @@ export class AuthController {
             });
         }
 
+        // Hand the session to the frontend if one is configured, otherwise return JSON (API behavior).
+        const frontend_url = FRONTEND_URL;
+        if (frontend_url && data) {
+            const query = new URLSearchParams({ session: data.token, name: data.name }).toString();
+            return response.redirect(302, `${frontend_url}/gate?${query}`);
+        }
+
         return respond(response, {
             status_code: 200,
             message: 'Google authentication successful',
+            data,
+            status: 'success'
+        });
+    }
+
+    async verify_session(request: Request, response: Response) {
+        const { session } = request.query;
+
+        if (!session || typeof session !== 'string') {
+            return respond(response, {
+                status_code: 400,
+                message: 'Session token is missing',
+                data: null,
+                status: 'error'
+            });
+        }
+
+        const { error, data } = await auth_service.verify_session(session);
+
+        if (error) {
+            return respond(response, {
+                status_code: error.code,
+                message: error.message,
+                data: null,
+                status: 'error'
+            });
+        }
+
+        return respond(response, {
+            status_code: 200,
+            message: 'Session verified',
             data,
             status: 'success'
         });

@@ -48,12 +48,22 @@ class MerchantApiService {
             return { error: response.error };
         }
 
-        const customer = await customer_repo.find({id: response.data!.customer_id}, ['id', 'email']);
+        const customer = await customer_repo.find({id: response.data!.customer_id}, ['email']);
 
-        (response.data! as any).customer = customer;
+        (response.data! as any).customer_email = customer.email;
 
         return { data: response.data };
 
+    }
+
+    // Public listing for merchants: sanitized rows, API-key scoped.
+    async list_transactions(filter: { merchant_id: number, limit?: number, offset?: number, status?: string })
+    : Promise<ServiceMethodReturnType<{ transactions: Partial<TransactionInterface>[], total: number }>> {
+        return transaction_service.get_merchant_transactions(filter.merchant_id, {
+            limit: filter.limit,
+            offset: filter.offset,
+            status: filter.status as any,
+        });
     }
 
     async verify_transaction(filter: Pick<TransactionInterface, 'reference' | 'merchant_id'>): Promise<ServiceMethodReturnType<TransactionInterface>> {
@@ -66,20 +76,11 @@ class MerchantApiService {
             return { error: response.error };
         }
 
-        const customer = await customer_repo.find({id: response.data!.customer_id}, ['id', 'email']);
+        const customer = await customer_repo.find({id: response.data!.customer_id}, ['email']);
 
-        (response.data! as any).customer = customer;
+        (response.data! as any).customer_email = customer?.email ?? null;
 
         return { data: response.data };
-    }
-
-    sanitize_transaction(transaction: TransactionInterface): Partial<TransactionInterface> {
-        const sanitized_transaction = { ...transaction } as Partial<TransactionInterface>;
-        delete sanitized_transaction.merchant_id;
-        delete sanitized_transaction.customer_id;
-        delete sanitized_transaction.trx_sync_attempt;
-        delete sanitized_transaction.webhook_retry_count;
-        return sanitized_transaction;
     }
 }
 

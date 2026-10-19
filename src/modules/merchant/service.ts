@@ -4,6 +4,10 @@ import { ApiKeyInterface } from './type.js';
 import { ServiceMethodReturnType } from '@utils/type.js';
 import { MERCHANT_API_KEY_ENCRYPTION_SECRET } from 'src/env/index.js';
 import { Transaction } from 'sequelize';
+import { TransactionInterface } from '@modules/core/transaction/type.js';
+import transaction_repo from '@modules/core/transaction/repo.js';
+import axios from 'axios';
+import transaction_service from '@modules/core/transaction/service.js';
 
 class MerchantService {
     constructor() {}
@@ -109,6 +113,24 @@ class MerchantService {
         };
     }
 
+    async set_webhook_url(merchant_id: number, webhook_url: string): Promise<ServiceMethodReturnType<{ message: string }>> {
+        const merchant = await merchant_repo.find({ id: merchant_id }, ['id']);
+        if (!merchant) return {
+            error: {
+                code: 404,
+                message: "Merchant not found"
+            }
+        };
+
+        await merchant_repo.update({ id: merchant_id }, { webhook_url });
+
+        return {
+            data: {
+                message: 'Webhook URL set successfully'
+            }
+        };
+    }
+
     async get_api_key_by_filter(filter: Partial<ApiKeyInterface>): Promise<ServiceMethodReturnType<{ api_key: string }>> {
         const record = await merchant_repo.find_api_key(filter, ['key']);
         if (!record) return {
@@ -134,6 +156,98 @@ class MerchantService {
             };
         }
     }
+
+    // Developer tab payload: webhook URL + the decrypted API key.
+    async get_developer_settings(merchant_id: number)
+    : Promise<ServiceMethodReturnType<{ api_key: string, webhook_url: string }>> {
+        const merchant = await merchant_repo.find({ id: merchant_id }, ['webhook_url']);
+        if (!merchant) return {
+            error: {
+                code: 404,
+                message: "Merchant not found"
+            }
+        };
+
+        const { data, error } = await this.get_api_key_by_filter({ merchant_id });
+        if (error) return { error };
+
+        return {
+            data: {
+                api_key: data!.api_key,
+                webhook_url: merchant.webhook_url ?? ""
+            }
+        };
+    }
+
+    async send_webhook(payload: TransactionInterface): Promise<ServiceMethodReturnType<{ webhook_not_set: boolean, webhook_sent: boolean }>> {
+        const merchant = await merchant_repo.find({ id: payload.merchant_id }, ['webhook_url']);
+        const api_key = await merchant_repo.find_api_key({ merchant_id: payload.merchant_id });
+        if(!merchant){
+            return {
+                error: {
+                    code: 404,
+                    message: "Merchant not found"
+                }
+            }
+        }
+
+        if(!api_key){
+            return {
+                error: {
+                    code: 404,
+                    message: "API key not found"
+                }
+            }
+        }
+        
+        if(!merchant.webhook_url){
+            await transaction_repo.update({ id: payload.id }, { webhook_call_is_resolved: true, webhook_call_resolution_reason: 'Missing webhook URL' }); // Mark the transaction as failed due to missing webhook URL
+            return {
+                data: {
+                    webhook_not_set: true,
+                    webhook_sent: false
+                }
+            };
+        }
+
+        const deencrypted_key = this.decrypt(api_key.key);
+        payload = transaction_service.sanitize_transaction(payload) as TransactionInterface;
+
+        try {
+            const request_body = {
+                event: "transaction.success",
+                data: payload
+            };
+            const signature = this.get_webhook_signature(request_body, deencrypted_key);
+            await axios.post(merchant.webhook_url, request_body, {
+                headers: {
+                    'X-Signature': signature
+                }
+            });
+          
+            return {
+                data: {
+                    webhook_not_set: false,
+                    webhook_sent: true
+                }
+            }
+        }
+        catch (e) {
+            console.log(e)
+            return {
+                data: {
+                    webhook_not_set: false,
+                    webhook_sent: false
+                }
+            };
+        }
+
+    }
+
+    private get_webhook_signature(payload: any, api_key: string): string {
+        return crypto.createHmac('sha256', api_key).update(JSON.stringify(payload)).digest('hex');
+    }
+
 }
 
 const merchant_service = new MerchantService();

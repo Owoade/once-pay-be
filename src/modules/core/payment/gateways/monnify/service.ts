@@ -3,7 +3,8 @@ import { PaymentService } from "../../base";
 import cache_repo from "@modules/core/cache/repo";
 import axios from "axios";
 import { ServiceMethodReturnType } from "@utils/type";
-import { InitiateTransaction, InitiateTransactionResponse, VerifyTransactionResponse } from "../../type";
+import { InitiateTransaction, InitiateTransactionResponse, ResolveWebhookResponse, VerifyTransactionResponse } from "../../type";
+import { MonnifyWebhookPayload } from "./type";
 
 class MonifyService implements PaymentService {
     private base_url = "https://sandbox.monnify.com/api"
@@ -169,6 +170,29 @@ class MonifyService implements PaymentService {
                 }
             }
         }
+    }
+
+    resolve_webhook(payload: MonnifyWebhookPayload): ServiceMethodReturnType<ResolveWebhookResponse> {
+        const event_type = payload?.eventType;
+        const reference = payload?.eventData?.paymentReference;
+
+        if (!event_type || !reference) {
+            return {
+                error: {
+                    code: 400,
+                    message: "Invalid monnify webhook payload"
+                }
+            };
+        }
+
+        return {
+            data: {
+                event: event_type === "SUCCESSFUL_TRANSACTION" ? "successful_transaction" : event_type === "FAILED_TRANSACTION" ? "failed_transaction" : "unrecognized_event",
+                status: payload.eventData.paymentStatus,
+                reference,
+                raw_webhook_request: payload
+            }
+        };
     }
 }
 

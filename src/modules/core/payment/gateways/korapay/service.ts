@@ -1,14 +1,15 @@
 import { BACKEND_BASE_URL, KORAPAY_SECRET_KEY } from "src/env";
 import { PaymentService } from "../../base";
 import { ServiceMethodReturnType } from "@utils/type";
-import { InitiateTransaction, InitiateTransactionResponse, VerifyTransactionResponse } from "../../type";
+import { InitiateTransaction, InitiateTransactionResponse, ResolveWebhookResponse, VerifyTransactionResponse } from "../../type";
+import { KoraPayWebhookPayload } from "./type";
 import axios from "axios";
 
 class KorapayService implements PaymentService {
     private base_url = "https://api.korapay.com/merchant/api/v1";
     private secret_key = KORAPAY_SECRET_KEY;
     private provider_name = "korapay";
-    private notification_url = "https://once-pay-api.owoade.dev/webhook/korapay"
+    private notification_url = "https://backpack-trailside-unraveled.ngrok-free.dev/webhooks/korapay"
 
     constructor() {
         this.initiate_transaction = this.initiate_transaction.bind(this);
@@ -109,6 +110,29 @@ class KorapayService implements PaymentService {
                 }
             }
         }
+    }
+
+    resolve_webhook(payload: KoraPayWebhookPayload): ServiceMethodReturnType<ResolveWebhookResponse> {
+        const event = payload?.event;
+        const reference = payload?.data?.reference;
+
+        if (!event || !reference) {
+            return {
+                error: {
+                    code: 400,
+                    message: "Invalid korapay webhook payload"
+                }
+            };
+        }
+
+        return {
+            data: {
+                event: event === "charge.success" ? "successful_transaction" : event === "charge.failed" ? "failed_transaction" : "unrecognized_event",
+                status: payload.data.status,
+                reference,
+                raw_webhook_request: payload
+            }
+        };
     }
 }
 

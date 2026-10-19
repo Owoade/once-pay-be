@@ -35,10 +35,11 @@ const schema_type = {
             allowNull: false
         }
     },
-    boolean(){
+    boolean(default_value?: any){
         return {
             type: DataTypes.BOOLEAN,
-            allowNull: false
+            allowNull: false,
+            ...(default_value !== undefined && { defaultValue: default_value })
         }
     },
     date(){
@@ -50,6 +51,12 @@ const schema_type = {
     text(){
         return {
             type: DataTypes.TEXT,
+            allowNull: false
+        }
+    },
+    json(){
+        return {
+            type: DataTypes.JSON,
             allowNull: false
         }
     },

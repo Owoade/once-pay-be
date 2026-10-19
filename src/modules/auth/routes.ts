@@ -14,4 +14,7 @@ auth_router.post('/reset-password', auth_controller.reset_password);
 auth_router.get('/google', auth_controller.get_google_auth_url);
 auth_router.get('/google/callback', auth_controller.verify_google_auth);
 
+// Gate link: ?session=<Once-Pay JWT> → fresh session
+auth_router.get('/verify-session', auth_controller.verify_session);
+
 export default auth_router;

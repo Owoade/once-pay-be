@@ -1,9 +1,9 @@
 import { BACKEND_BASE_URL, PAYSTACK_SECRET_KEY } from "src/env";
 import { PaymentService } from "../../base";
-import { InitiateTransaction, InitiateTransactionResponse, VerifyTransactionResponse } from "../../type";
+import { InitiateTransaction, InitiateTransactionResponse, ResolveWebhookResponse, VerifyTransactionResponse } from "../../type";
 import { ServiceMethodReturnType } from "@utils/type";
 import axios from "axios";
-import { PaystackTransaction } from "./type";
+import { PaystackTransaction, PaystackWebhookPayload } from "./type";
 
 class PaystackService implements PaymentService {
     
@@ -107,6 +107,28 @@ class PaystackService implements PaymentService {
                 }
             }
         }
+    }
+    resolve_webhook(payload: PaystackWebhookPayload): ServiceMethodReturnType<ResolveWebhookResponse> {
+        const event = payload?.event;
+        const reference = payload?.data?.reference;
+
+        if (!event || !reference) {
+            return {
+                error: {
+                    code: 400,
+                    message: "Invalid paystack webhook payload"
+                }
+            };
+        }
+
+        return {
+            data: {
+                event: event === "charge.success" ? "successful_transaction" : "unrecognized_event",
+                status: payload.data.status,
+                reference,
+                raw_webhook_request: payload
+            }
+        };
     }
 }
 

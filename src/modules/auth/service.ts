@@ -147,6 +147,19 @@ class AuthService {
         }
     }
 
+    
+    async verify_session(session_token: string)
+    : Promise<ServiceMethodReturnType<{ token: string, name: string }>>
+    {
+        const payload = this.verify_token(session_token);
+        if (!payload?.id) return { error: { code: 401, message: 'Invalid or expired session' } };
+
+        const merchant = await merchant_repo.find({ id: payload.id });
+        if (!merchant) return { error: { code: 404, message: 'User not found' } };
+
+        return { data: { token: session_token, name: (merchant as any).name } };
+    }
+
     async get_google_auth_url(): Promise<ServiceMethodReturnType<{ url: string }>> {
         const rootUrl = 'https://accounts.google.com/o/oauth2/v2/auth';
         const options = {

@@ -3,8 +3,8 @@ import { PaymentService } from "../../base";
 import cache_repo from "@modules/core/cache/repo";
 import axios from "axios";
 import { ServiceMethodReturnType } from "@utils/type";
-import { InitiateTransaction, InitiateTransactionResponse, VerifyTransactionResponse } from "../../type";
-import { SeerbitQueryResponse } from "./type";
+import { InitiateTransaction, InitiateTransactionResponse, ResolveWebhookResponse, VerifyTransactionResponse } from "../../type";
+import { SeerbitQueryResponse, SeerbitWebhookPayload } from "./type";
 
 class SeerbitService implements PaymentService {
     private base_url = "https://seerbitapi.com/api";
@@ -167,6 +167,29 @@ class SeerbitService implements PaymentService {
                 }
             };
         }
+    }
+
+    resolve_webhook(payload: SeerbitWebhookPayload): ServiceMethodReturnType<ResolveWebhookResponse> {
+        const code = payload?.payload?.code;
+        const reference = payload?.payload?.paymentReference;
+
+        if (!code || !reference) {
+            return {
+                error: {
+                    code: 400,
+                    message: "Invalid seerbit webhook payload"
+                }
+            };
+        }
+
+        return {
+            data: {
+                event: code === "00" ? "successful_transaction" : code === "01" ? "failed_transaction" : "unrecognized_event",
+                status: payload.payload.paymentStatus ?? code,
+                reference,
+                raw_webhook_request: payload
+            }
+        };
     }
 }
 

@@ -19,3 +19,14 @@ export interface SeerbitQueryResponse {
     message: string;
     payments: SeerbitPayment;
 }
+
+export interface SeerbitWebhookEvent {
+    paymentReference: string;
+    code: string;
+    paymentStatus?: string;
+    [key: string]: unknown;
+}
+
+export interface SeerbitWebhookPayload {
+    payload: SeerbitWebhookEvent;
+}

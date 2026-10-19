@@ -18,10 +18,19 @@ export interface TransactionInterface {
   payment_made_at_ms?: number;
   webhook_retry_count: number;
   trx_sync_attempt: number;
+  webhook_call_is_resolved: boolean;
+  webhook_call_resolution_reason?: string;
   payment_gateway_trx_reference?: string;
   callback_url?: string;
+  metadata?: Record<string, any>;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface TransactionSummary {
+  total_amount: number;
+  transaction_count: number;
+  daily_volumes: Array<{ date: string; amount: number }>;
 }
 
 export interface ProcessTransaction {

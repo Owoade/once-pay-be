@@ -20,5 +20,8 @@ export const TransactionSchema = {
     payment_made_at_ms: schema_type.optional(() => schema_type.optional(() => schema_type.int())),
     webhook_retry_count: schema_type.int(0),
     trx_sync_attempt: schema_type.int(0),
+    webhook_call_is_resolved: schema_type.boolean(false),
+    webhook_call_resolution_reason: schema_type.optional(() => schema_type.text()),
     callback_url: schema_type.optional(() => schema_type.string()),
+    metadata: schema_type.optional(() => schema_type.json()),
 };

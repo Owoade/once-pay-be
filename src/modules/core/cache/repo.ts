@@ -31,6 +31,14 @@ class CacheRepo {
     async delete(key: string) {
         return await cache_model.destroy({ where: { key } });
     }
+
+    async delete_stale_keys(){
+        return await cache_model.destroy({
+            where: {
+                expiry: { [Op.lte]: moment().toDate() }
+            }
+        });
+    }
 }
 
 const cache_repo = new CacheRepo()

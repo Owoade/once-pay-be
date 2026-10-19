@@ -39,3 +39,8 @@ export interface FlutterwaveCustomer {
   email: string;
   created_at: string;
 }
+
+export interface FlutterwaveWebhookPayload {
+  event: "charge.completed" | (string & {});
+  data: FlutterwaveTransaction;
+}

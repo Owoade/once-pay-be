@@ -4,6 +4,7 @@ export default interface MerchantModelInterface {
     email: string;
     password?: string;
     auth_channel?: string;
+    webhook_url?: string;
     api_key: string;
     api_key_id: string;
     createdAt: string;

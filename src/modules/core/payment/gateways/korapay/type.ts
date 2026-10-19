@@ -14,3 +14,8 @@ export interface KoraPayPayerBankAccount {
   account_name: string;
   bank_name: string;
 }
+
+export interface KoraPayWebhookPayload {
+  event: "charge.success" | "charge.failed" | (string & {});
+  data: KoraPayTransaction;
+}
