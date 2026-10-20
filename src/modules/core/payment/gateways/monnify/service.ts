@@ -91,7 +91,7 @@ class MonifyService implements PaymentService {
 
         try {
             const response = await axios.get(
-                `${this.base_url}/v2/merchant/transactions/query?transactionReference=${key}`,
+                `${this.base_url}/v2/merchant/transactions/query?paymentReference=${encodeURIComponent(key)}`,
                 {
                     headers: {
                         Authorization: `Bearer ${access_token}`
@@ -134,9 +134,7 @@ class MonifyService implements PaymentService {
     // MONIFY_CONTRACT_CODE is unset — with a warning, since a real initiate
     // will only succeed with the account's actual contract code.
     private contract_code(): string {
-        if (MONIFY_CONTRACT_CODE) return MONIFY_CONTRACT_CODE;
-        console.warn("MONIFY_CONTRACT_CODE not set — falling back to mock contract code");
-        return "5867418298";
+       return MONIFY_CONTRACT_CODE;
     }
 
     private async get_access_token(): Promise<ServiceMethodReturnType<string>> {
