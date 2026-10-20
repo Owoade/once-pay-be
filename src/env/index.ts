@@ -24,6 +24,9 @@ const env_validator = Joi.object({
   R2_SECRET_ACCESS_KEY: Joi.string().required(),
   R2_ENDPOINT_URL: Joi.string().required(),
   SQLITE_FILE: Joi.string().required(),
+  // Optional: when unset, telegram notifications are skipped (signup is unaffected).
+  TELEGRAM_BOT_TOKEN: Joi.string().default(''),
+  TELEGRAM_CHAT_IDS: Joi.string().default(''),
 }).unknown(true);
 
 
@@ -53,4 +56,6 @@ export const R2_ACCESS_KEY_ID = env.R2_ACCESS_KEY_ID;
 export const R2_SECRET_ACCESS_KEY = env.R2_SECRET_ACCESS_KEY;
 export const R2_ENDPOINT_URL = env.R2_ENDPOINT_URL;
 export const SQLITE_FILE = env.SQLITE_FILE;
+export const TELEGRAM_BOT_TOKEN = env.TELEGRAM_BOT_TOKEN;
+export const TELEGRAM_CHAT_IDS = env.TELEGRAM_CHAT_IDS;
 

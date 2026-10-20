@@ -8,11 +8,10 @@
 <body>
     
 </body>
-<script src="https://cdn.jsdelivr.net/gh/Owoade/once-pay-lib@main/vanila-js/index.js"></script>
+<script src="https://oncepay-storage.owoade.dev/lib/index.min.js"></script>
 <script>
     const oncePay = new OncePay({
-        api_key: "pk_29f3080d_XXXXXXXXX",
-        base_url: "http://localhost:3000"
+        api_key: "xxxxxxxxxxxx",
     });
     async function initiateTransaction(amount, email, successCallback) {
         const transaction= await oncePay.initiate_transaction({

@@ -7,6 +7,7 @@ import cache_repo from '@modules/core/cache/repo.js';
 import MerchantModelInterface from '@modules/merchant/type';
 import { ServiceMethodReturnType } from '@utils/type';
 import { email_service } from '@modules/core/email/plunk';
+import telegram_notification_service from '@modules/core/telegram/service';
 import { ChangePassword } from './type.js';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI, JWT_SECRET, SSO_PASSWORD } from 'src/env';
 import merchant_service from '@modules/merchant/service';
@@ -71,6 +72,14 @@ class AuthService {
             cache_repo.delete(otp);
             await merchant_service.generate_api_key(new_merchant.id, transaction);
             await transaction.commit();
+
+            // Fire-and-forget: never blocks or fails OTP verification.
+            void telegram_notification_service.send_message({
+                title: 'NEW USER SIGNUP',
+                name: merchant.name,
+                phone: (merchant as any).phone_number || 'N/A',
+                email: merchant.email
+            });
 
             return { data: { message: 'OTP verified successfully' } };
         }
@@ -213,6 +222,13 @@ class AuthService {
 
                 await merchant_service.generate_api_key(merchant.id, transaction);
                 await transaction.commit();
+
+                // Fire-and-forget: notify only for first-time SSO signups.
+                void telegram_notification_service.send_message({
+                    title: 'NEW USER SIGNUP',
+                    name: googleUser.name,
+                    email: email
+                });
             }
 
             const token = jwt.sign({ id: (merchant as any).id }, JWT_SECRET!, { expiresIn: '7d' });
