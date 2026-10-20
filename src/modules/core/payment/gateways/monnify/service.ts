@@ -36,10 +36,10 @@ class MonifyService implements PaymentService {
                     currencyCode: "NGN",
                     contractCode: this.contract_code(),
                     redirectUrl: `${BACKEND_BASE_URL}/transaction/callback/${this.provider_name}/${payload.internal_trx_reference}`,
-                    // Monnify's own metadata field; omitted when the Once-Pay
-                    // transaction has none. paymentMethods is likewise omitted
-                    // — Monnify then offers every method enabled on the account.
-                    ...(payload.metadata && { metaData: payload.metadata }),
+                    // Monnify's field for customer extras is `metadata` (docs'
+                    // InitializeTransactionRequest); the metaData spelling gets
+                    // rejected with responseCode 99 ("malformed syntax").
+                    ...(payload.metadata && { metadata: payload.metadata }),
                 },
                 {
                     headers: {
