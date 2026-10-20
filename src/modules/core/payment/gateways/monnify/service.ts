@@ -1,4 +1,4 @@
-import { BACKEND_BASE_URL, MONIFY_API_KEY, MONIFY_SECRET_KEY } from "src/env";
+import { BACKEND_BASE_URL, MONIFY_API_KEY, MONIFY_CONTRACT_CODE, MONIFY_SECRET_KEY } from "src/env";
 import { PaymentService } from "../../base.js";
 import cache_repo from "@modules/core/cache/repo";
 import axios from "axios";
@@ -32,8 +32,14 @@ class MonifyService implements PaymentService {
                     amount: payload.amount,
                     customerEmail: payload.email,
                     paymentReference: payload.internal_trx_reference,
+                    paymentDescription: "Once-Pay payment",
                     currencyCode: "NGN",
+                    contractCode: this.contract_code(),
                     redirectUrl: `${BACKEND_BASE_URL}/transaction/callback/${this.provider_name}/${payload.internal_trx_reference}`,
+                    // Monnify's own metadata field; omitted when the Once-Pay
+                    // transaction has none. paymentMethods is likewise omitted
+                    // — Monnify then offers every method enabled on the account.
+                    ...(payload.metadata && { metaData: payload.metadata }),
                 },
                 {
                     headers: {
@@ -121,6 +127,16 @@ class MonifyService implements PaymentService {
             };
         }
 
+    }
+
+    // Account-scoped: Monnify routes the transaction to the contract that owns
+    // the checkout. Falls back to the docs' sandbox mock while
+    // MONIFY_CONTRACT_CODE is unset — with a warning, since a real initiate
+    // will only succeed with the account's actual contract code.
+    private contract_code(): string {
+        if (MONIFY_CONTRACT_CODE) return MONIFY_CONTRACT_CODE;
+        console.warn("MONIFY_CONTRACT_CODE not set — falling back to mock contract code");
+        return "5867418298";
     }
 
     private async get_access_token(): Promise<ServiceMethodReturnType<string>> {

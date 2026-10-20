@@ -18,6 +18,9 @@ const env_validator = Joi.object({
   KORAPAY_SECRET_KEY: Joi.string().required(),
   MONIFY_API_KEY: Joi.string().required(),
   MONIFY_SECRET_KEY: Joi.string().required(),
+  // Monnify contract code (from the Monnify dashboard); falls back to a mock
+  // when unset.
+  MONIFY_CONTRACT_CODE: Joi.string().default(''),
   MERCHANT_API_KEY_ENCRYPTION_SECRET: Joi.string().required(),
   SEERBIT_PUBLIC_KEY: Joi.string().required(),
   SEERBIT_SECRET_KEY: Joi.string().required(),
@@ -51,6 +54,7 @@ export const FLUTTERWAVE_SECRET_KEY = env.FLUTTERWAVE_SECRET_KEY;
 export const KORAPAY_SECRET_KEY = env.KORAPAY_SECRET_KEY;
 export const MONIFY_API_KEY = env.MONIFY_API_KEY;
 export const MONIFY_SECRET_KEY = env.MONIFY_SECRET_KEY;
+export const MONIFY_CONTRACT_CODE = env.MONIFY_CONTRACT_CODE;
 export const MERCHANT_API_KEY_ENCRYPTION_SECRET = env.MERCHANT_API_KEY_ENCRYPTION_SECRET;
 export const SEERBIT_PUBLIC_KEY = env.SEERBIT_PUBLIC_KEY;
 export const SEERBIT_SECRET_KEY = env.SEERBIT_SECRET_KEY;
