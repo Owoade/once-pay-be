@@ -17,9 +17,10 @@
       "@db/*": ["src/db/*"],
       "@modules/*": ["src/modules/*"],
       "@utils/*": ["src/utils/*"],
-      "@env/*": ["src/environment/*"],
+      "@env/*": ["src/env/*"],
       "@decorators/*": ["src/decorators/*"],
-      "@validators/*": ["src/validators/*"]
+      "@validators/*": ["src/validators/*"],
+      "src/*": ["src/*"]
     }
   },
   "include": ["src/**/*"]

@@ -1,5 +1,5 @@
 import express from 'express';
-import merchant_api_controller from './controller';
+import merchant_api_controller from './controller.js';
 
 const merchant_api_router = express.Router();
 

@@ -1,15 +1,15 @@
 import { ServiceMethodReturnType } from "@utils/type";
-import flutterwave_service from "../payment/gateways/flutterwave/service";
-import korapay_service from "../payment/gateways/korapay/service";
-import monnify_service from "../payment/gateways/monnify/service";
-import seerbit_service from "../payment/gateways/seerbit/service";
-import paystack_service from "../payment/gateways/paystack/service";
-import { ProcessTransaction, PaymentProcessors, TransactionInterface, TransactionStatus, TransactionSummary } from "./type";
-import { InitiateTransactionResponse } from "../payment/type";
-import transaction_repo from "./repo";
-import cache_repo from "../cache/repo";
+import flutterwave_service from "../payment/gateways/flutterwave/service.js";
+import korapay_service from "../payment/gateways/korapay/service.js";
+import monnify_service from "../payment/gateways/monnify/service.js";
+import seerbit_service from "../payment/gateways/seerbit/service.js";
+import paystack_service from "../payment/gateways/paystack/service.js";
+import { ProcessTransaction, PaymentProcessors, TransactionInterface, TransactionStatus, TransactionSummary } from "./type.js";
+import { InitiateTransactionResponse } from "../payment/type.js";
+import transaction_repo from "./repo.js";
+import cache_repo from "../cache/repo.js";
 import merchant_service from "@modules/merchant/service";
-import { transaction_event } from "../event";
+import { transaction_event } from "../event/index.js";
 
 class TransactionService {
 

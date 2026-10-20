@@ -1,5 +1,5 @@
-import customer_repo from "./repo";
-import { CustomerInterface } from "./type";
+import customer_repo from "./repo.js";
+import { CustomerInterface } from "./type.js";
 
 class CustomerService {
     constructor() {}

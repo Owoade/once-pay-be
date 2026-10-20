@@ -1,5 +1,5 @@
-import { CustomerInterface } from "../customer/type";
-import { PaymentService } from "../payment/base";
+import { CustomerInterface } from "../customer/type.js";
+import { PaymentService } from "../payment/base.js";
 
 const VALID_PAYMENT_GATEWAYS = ["paystack", "flutterwave", "korapay", "monnify", "seerbit"] as const;
 

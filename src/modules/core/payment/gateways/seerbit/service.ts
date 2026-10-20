@@ -1,10 +1,10 @@
 import { BACKEND_BASE_URL, SEERBIT_PUBLIC_KEY, SEERBIT_SECRET_KEY } from "src/env";
-import { PaymentService } from "../../base";
+import { PaymentService } from "../../base.js";
 import cache_repo from "@modules/core/cache/repo";
 import axios from "axios";
 import { ServiceMethodReturnType } from "@utils/type";
-import { InitiateTransaction, InitiateTransactionResponse, ResolveWebhookResponse, VerifyTransactionResponse } from "../../type";
-import { SeerbitQueryResponse, SeerbitWebhookPayload } from "./type";
+import { InitiateTransaction, InitiateTransactionResponse, ResolveWebhookResponse, VerifyTransactionResponse } from "../../type.js";
+import { SeerbitQueryResponse, SeerbitWebhookPayload } from "./type.js";
 
 class SeerbitService implements PaymentService {
     private base_url = "https://seerbitapi.com/api";

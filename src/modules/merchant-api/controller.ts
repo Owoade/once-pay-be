@@ -3,8 +3,8 @@ import { initiate_transaction_validator, verify_transaction_from_callback_url_va
 import { transactions_list_validator } from "@validators/merchant";
 import { id_validator_string } from "@validators/utils";
 import { Request, Response } from "express";
-import { InitiateTransactionFromAPI } from "./type";
-import merchant_api_service from "./service";
+import { InitiateTransactionFromAPI } from "./type.js";
+import merchant_api_service from "./service.js";
 import respond from "@utils/respond";
 import { TransactionInterface } from "@modules/core/transaction/type";
 import transaction_service from "@modules/core/transaction/service";

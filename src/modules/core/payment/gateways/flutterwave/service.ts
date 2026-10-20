@@ -1,8 +1,8 @@
 import { BACKEND_BASE_URL, FLUTTERWAVE_SECRET_KEY } from "src/env";
-import { PaymentService } from "../../base";
-import { InitiateTransaction, InitiateTransactionResponse, ResolveWebhookResponse, VerifyTransactionResponse } from "../../type";
+import { PaymentService } from "../../base.js";
+import { InitiateTransaction, InitiateTransactionResponse, ResolveWebhookResponse, VerifyTransactionResponse } from "../../type.js";
 import { ServiceMethodReturnType } from "@utils/type";
-import { FlutterwaveWebhookPayload } from "./type";
+import { FlutterwaveWebhookPayload } from "./type.js";
 import axios from "axios";
 
 class FlutterwaveService implements PaymentService {

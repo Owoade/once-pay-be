@@ -1,7 +1,7 @@
 import db from '@db/index.js';
 import { TRANSACTION_TABLE_NAME, TransactionSchema } from '@db/schema/transaction';
 import type { InferedSchemaType } from '@utils/schema_type.js';
-import { TransactionInterface } from './type';
+import { TransactionInterface } from './type.js';
 import { merchant_model } from '@modules/merchant/model';
 import { customer_model } from '@modules/core/customer/model';
 

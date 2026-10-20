@@ -1,5 +1,5 @@
 import { ServiceMethodReturnType } from "@utils/type";
-import { InitiateTransaction, InitiateTransactionResponse, ResolveWebhookResponse, VerifyTransactionResponse } from "./type";
+import { InitiateTransaction, InitiateTransactionResponse, ResolveWebhookResponse, VerifyTransactionResponse } from "./type.js";
 
 export interface PaymentService {
     initiate_transaction(payload: InitiateTransaction): Promise<ServiceMethodReturnType<InitiateTransactionResponse>>;

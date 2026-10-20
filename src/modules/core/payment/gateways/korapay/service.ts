@@ -1,8 +1,8 @@
 import { BACKEND_BASE_URL, KORAPAY_SECRET_KEY } from "src/env";
-import { PaymentService } from "../../base";
+import { PaymentService } from "../../base.js";
 import { ServiceMethodReturnType } from "@utils/type";
-import { InitiateTransaction, InitiateTransactionResponse, ResolveWebhookResponse, VerifyTransactionResponse } from "../../type";
-import { KoraPayWebhookPayload } from "./type";
+import { InitiateTransaction, InitiateTransactionResponse, ResolveWebhookResponse, VerifyTransactionResponse } from "../../type.js";
+import { KoraPayWebhookPayload } from "./type.js";
 import axios from "axios";
 
 class KorapayService implements PaymentService {

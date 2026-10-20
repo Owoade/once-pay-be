@@ -6,7 +6,7 @@ import {
     forgot_password_validator,
     reset_password_validator
 } from "@validators/auth";
-import auth_service from "./service";
+import auth_service from "./service.js";
 import respond from "@utils/respond";
 
 export class AuthController {

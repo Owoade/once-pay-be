@@ -1,10 +1,10 @@
 import { BACKEND_BASE_URL, MONIFY_API_KEY, MONIFY_SECRET_KEY } from "src/env";
-import { PaymentService } from "../../base";
+import { PaymentService } from "../../base.js";
 import cache_repo from "@modules/core/cache/repo";
 import axios from "axios";
 import { ServiceMethodReturnType } from "@utils/type";
-import { InitiateTransaction, InitiateTransactionResponse, ResolveWebhookResponse, VerifyTransactionResponse } from "../../type";
-import { MonnifyWebhookPayload } from "./type";
+import { InitiateTransaction, InitiateTransactionResponse, ResolveWebhookResponse, VerifyTransactionResponse } from "../../type.js";
+import { MonnifyWebhookPayload } from "./type.js";
 
 class MonifyService implements PaymentService {
     private base_url = "https://sandbox.monnify.com/api"

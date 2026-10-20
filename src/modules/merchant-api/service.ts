@@ -1,5 +1,5 @@
 import customer_service from "@modules/core/customer/service";
-import { InitiateTransactionFromAPI} from "./type";
+import { InitiateTransactionFromAPI} from "./type.js";
 import transaction_service from "@modules/core/transaction/service";
 import { ServiceMethodReturnType } from "@utils/type";
 import { InitiateTransactionResponse } from "@modules/core/payment/type";

@@ -7,7 +7,7 @@ import cache_repo from '@modules/core/cache/repo.js';
 import MerchantModelInterface from '@modules/merchant/type';
 import { ServiceMethodReturnType } from '@utils/type';
 import { email_service } from '@modules/core/email/plunk';
-import { ChangePassword } from './type';
+import { ChangePassword } from './type.js';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI, JWT_SECRET, SSO_PASSWORD } from 'src/env';
 import merchant_service from '@modules/merchant/service';
 import db from '@db/index';

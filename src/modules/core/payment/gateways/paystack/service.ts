@@ -1,9 +1,9 @@
 import { BACKEND_BASE_URL, PAYSTACK_SECRET_KEY } from "src/env";
-import { PaymentService } from "../../base";
-import { InitiateTransaction, InitiateTransactionResponse, ResolveWebhookResponse, VerifyTransactionResponse } from "../../type";
+import { PaymentService } from "../../base.js";
+import { InitiateTransaction, InitiateTransactionResponse, ResolveWebhookResponse, VerifyTransactionResponse } from "../../type.js";
 import { ServiceMethodReturnType } from "@utils/type";
 import axios from "axios";
-import { PaystackTransaction, PaystackWebhookPayload } from "./type";
+import { PaystackTransaction, PaystackWebhookPayload } from "./type.js";
 
 class PaystackService implements PaymentService {
     
