@@ -12,6 +12,8 @@ const env_validator = Joi.object({
   SSO_PASSWORD: Joi.string().required(),
   PAYSTACK_SECRET_KEY: Joi.string().required(),
   BACKEND_BASE_URL: Joi.string().required(),
+  // Frontend origin: redirect target for gate / google callback handoffs.
+  FRONTEND_URL: Joi.string().required(),
   FLUTTERWAVE_SECRET_KEY: Joi.string().required(),
   KORAPAY_SECRET_KEY: Joi.string().required(),
   MONIFY_API_KEY: Joi.string().required(),
@@ -44,6 +46,7 @@ export const GOOGLE_REDIRECT_URI = env.GOOGLE_REDIRECT_URI;
 export const SSO_PASSWORD = env.SSO_PASSWORD;
 export const PAYSTACK_SECRET_KEY = env.PAYSTACK_SECRET_KEY;
 export const BACKEND_BASE_URL = env.BACKEND_BASE_URL;
+export const FRONTEND_URL = env.FRONTEND_URL;
 export const FLUTTERWAVE_SECRET_KEY = env.FLUTTERWAVE_SECRET_KEY;
 export const KORAPAY_SECRET_KEY = env.KORAPAY_SECRET_KEY;
 export const MONIFY_API_KEY = env.MONIFY_API_KEY;

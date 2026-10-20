@@ -8,6 +8,7 @@ import {
 } from "@validators/auth";
 import auth_service from "./service.js";
 import respond from "@utils/respond";
+import { FRONTEND_URL } from "src/env";
 
 export class AuthController {
     constructor(){}
@@ -124,31 +125,27 @@ export class AuthController {
         const { code } = request.query;
 
         if (!code) {
-            return respond(response, {
-                status_code: 400,
-                message: 'Authorization code is missing',
-                data: null,
-                status: 'error'
-            });
+            // The callback is a browser redirect flow, so failures hand off to
+            // the frontend's gate page instead of answering with JSON.
+            return response.redirect(
+                302,
+                `${FRONTEND_URL}/gate?error=${encodeURIComponent('Authorization code is missing')}`
+            );
         }
 
         const { error, data } = await auth_service.verify_google_auth(code as string);
 
-        if (error) {
-            return respond(response, {
-                status_code: error.code,
-                message: error.message,
-                data: null,
-                status: 'error'
-            });
+        if (error || !data?.token) {
+            return response.redirect(
+                302,
+                `${FRONTEND_URL}/gate?error=${encodeURIComponent(error?.message || 'Google authentication failed')}`
+            );
         }
 
-        return respond(response, {
-            status_code: 200,
-            message: 'Google authentication successful',
-            data,
-            status: 'success'
-        });
+        return response.redirect(
+            302,
+            `${FRONTEND_URL}/gate?session=${encodeURIComponent(data.token)}`
+        );
     }
 
     async verify_session(request: Request, response: Response) {
