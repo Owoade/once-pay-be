@@ -204,7 +204,7 @@ abstract class ServiceDecorator {
         descriptor.value = async function (...args: [Request, Response]) {
           const [request, response] = args;
 
-          if (request.url?.includes("/transaction/callback")) {
+          if (request.url?.includes("/transaction/callback") || request.url?.includes("/whitelist")) {
             return original_method.apply(this, args);
           }
 

@@ -103,11 +103,11 @@ class FlutterwaveService implements PaymentService {
             };
         }
         catch (err: any) {
-            console.log({err_message: err.response?.data.message ?? err.response.message});
+            console.log({err_message: err.response?.data.message ?? err?.response?.message});
             return {
                 error: {
                     code: 400,
-                    message: err.response?.data.message ?? err.response.message
+                    message: err.response?.data.message ?? err?.response?.message
                 }
             }
         }

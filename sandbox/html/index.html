@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+<script src="https://cdn.jsdelivr.net/gh/Owoade/once-pay-lib@main/vanila-js/index.js"></script>
+<script>
+    const oncePay = new OncePay({
+        api_key: "pk_29f3080d_XXXXXXXXX",
+        base_url: "http://localhost:3000"
+    });
+    async function initiateTransaction(amount, email, successCallback) {
+        const transaction= await oncePay.initiate_transaction({
+            amount: amount,
+            email: email,
+            payment_gateway: "flutterwave",
+            on_success: successCallback
+        });
+        console.log({transaction})
+    }
+    initiateTransaction(1000, "test@example.com", (transaction) => {
+        console.log("Transaction successful:", transaction);
+    });
+</script>
+</html>

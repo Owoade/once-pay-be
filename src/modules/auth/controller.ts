@@ -8,7 +8,6 @@ import {
 } from "@validators/auth";
 import auth_service from "./service";
 import respond from "@utils/respond";
-import { FRONTEND_URL } from "src/env";
 
 export class AuthController {
     constructor(){}
@@ -142,13 +141,6 @@ export class AuthController {
                 data: null,
                 status: 'error'
             });
-        }
-
-        // Hand the session to the frontend if one is configured, otherwise return JSON (API behavior).
-        const frontend_url = FRONTEND_URL;
-        if (frontend_url && data) {
-            const query = new URLSearchParams({ session: data.token, name: data.name }).toString();
-            return response.redirect(302, `${frontend_url}/gate?${query}`);
         }
 
         return respond(response, {

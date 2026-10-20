@@ -1,12 +1,14 @@
 import { CustomerInterface } from "../customer/type";
 import { PaymentService } from "../payment/base";
 
+const VALID_PAYMENT_GATEWAYS = ["paystack", "flutterwave", "korapay", "monnify", "seerbit"] as const;
+
 export interface TransactionInterface {
   id?: number;
   merchant_id: number;
   reference: string;
   amount: number;
-  payment_gateway: "paystack" | "flutterwave" | "korapay" | "monnify" | "seerbit";
+  payment_gateway: typeof VALID_PAYMENT_GATEWAYS[number];
   payment_gateway_trx_id?: string;
   customer_id: number;
   status: "successful" | "pending" | "failed";

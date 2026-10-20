@@ -9,6 +9,7 @@ import { InitiateTransactionResponse } from "../payment/type";
 import transaction_repo from "./repo";
 import cache_repo from "../cache/repo";
 import merchant_service from "@modules/merchant/service";
+import { transaction_event } from "../event";
 
 class TransactionService {
 
@@ -105,9 +106,12 @@ class TransactionService {
 
         const update_payload = {} as Partial<TransactionInterface>
 
-        if(existing_trx.status !== 'successful' && TRANSACTION_IS_SUCCESSFUL){
+        // Already narrowed: the 'successful' early-return above guarantees
+        // existing_trx.status here is 'pending' | 'failed'.
+        if(TRANSACTION_IS_SUCCESSFUL){
             update_payload.status = 'successful';
             update_payload.resolved_in_secs = Math.floor((Date.now() - parseInt(existing_trx.initiated_at_ms as any)) / 1000);
+            transaction_event.emit('transaction', { reference: existing_trx.reference });
         }
             
 
@@ -234,6 +238,46 @@ class TransactionService {
         }
     }
 
+        async handle_webhook(payment_gateway: TransactionInterface['payment_gateway'], request: any)
+    : Promise<ServiceMethodReturnType<void>> {
+        const processor = this.processors[payment_gateway];
+        if (!processor) {
+            return {
+                error: {
+                    code: 400,
+                    message: "Unsupported payment gateway"
+                }
+            };
+        }
+
+        const response = processor.resolve_webhook(request);
+
+        if(response.error)
+            return { error: response.error };
+
+        if(response.data?.reference)
+            transaction_event.emit('transaction', { reference: response.data?.reference });
+
+        if(response.data?.event === "successful_transaction"){
+            const data = response.data;
+            const trx = await transaction_repo.find({ reference: data.reference });
+   
+            if(trx){
+               const update_payload = {} as Partial<TransactionInterface>;
+               if(trx.status !== "successful"){
+                   update_payload.status = "successful";
+                   update_payload.resolved_in_secs = Math.floor((Date.now() - parseInt(trx.initiated_at_ms as any)) / 1000);
+                   update_payload.payment_gateway_status = this.successful_trx_status[payment_gateway];
+               }
+               update_payload.payment_gateway_webhook_response = JSON.stringify(response.data.raw_webhook_request);
+               await transaction_repo.update({id: trx.id}, update_payload);
+            }
+        }
+
+        return {}
+    }
+
+
     async handle_transactions_due_for_webhook_call(transactions: TransactionInterface[]){
         for(const trx of transactions){
             const response = await merchant_service.send_webhook(trx);
@@ -264,42 +308,6 @@ class TransactionService {
     async handle_stale_transactions_due_for_webhook_call(){
         const stale_transactions = await transaction_repo.get_stale_transactions_due_for_webhook_call();
         await this.handle_transactions_due_for_webhook_call(stale_transactions);
-    }
-
-    async handle_webhook(payment_gateway: TransactionInterface['payment_gateway'], request: any)
-    : Promise<ServiceMethodReturnType<void>> {
-        const processor = this.processors[payment_gateway];
-        if (!processor) {
-            return {
-                error: {
-                    code: 400,
-                    message: "Unsupported payment gateway"
-                }
-            };
-        }
-
-        const response = processor.resolve_webhook(request);
-
-        if(response.error)
-            return { error: response.error };
-
-        if(response.data?.event === "successful_transaction"){
-            const data = response.data;
-            const trx = await transaction_repo.find({ reference: data.reference });
-   
-            if(trx){
-               const update_payload = {} as Partial<TransactionInterface>;
-               if(trx.status !== "successful"){
-                   update_payload.status = "successful";
-                   update_payload.resolved_in_secs = Math.floor((Date.now() - parseInt(trx.initiated_at_ms as any)) / 1000);
-                   update_payload.payment_gateway_status = this.successful_trx_status[payment_gateway];
-               }
-               update_payload.payment_gateway_webhook_response = JSON.stringify(response.data.raw_webhook_request);
-               await transaction_repo.update({id: trx.id}, update_payload);
-            }
-        }
-
-        return {}
     }
 
     sanitize_transaction(transaction: TransactionInterface): Partial<TransactionInterface> {

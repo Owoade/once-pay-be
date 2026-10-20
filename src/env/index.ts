@@ -12,7 +12,6 @@ const env_validator = Joi.object({
   SSO_PASSWORD: Joi.string().required(),
   PAYSTACK_SECRET_KEY: Joi.string().required(),
   BACKEND_BASE_URL: Joi.string().required(),
-  FRONTEND_URL: Joi.string().required(),
   FLUTTERWAVE_SECRET_KEY: Joi.string().required(),
   KORAPAY_SECRET_KEY: Joi.string().required(),
   MONIFY_API_KEY: Joi.string().required(),
@@ -20,6 +19,11 @@ const env_validator = Joi.object({
   MERCHANT_API_KEY_ENCRYPTION_SECRET: Joi.string().required(),
   SEERBIT_PUBLIC_KEY: Joi.string().required(),
   SEERBIT_SECRET_KEY: Joi.string().required(),
+  R2_BUCKET_NAME: Joi.string().required(),
+  R2_ACCESS_KEY_ID: Joi.string().required(),
+  R2_SECRET_ACCESS_KEY: Joi.string().required(),
+  R2_ENDPOINT_URL: Joi.string().required(),
+  SQLITE_FILE: Joi.string().required(),
 }).unknown(true);
 
 
@@ -37,7 +41,6 @@ export const GOOGLE_REDIRECT_URI = env.GOOGLE_REDIRECT_URI;
 export const SSO_PASSWORD = env.SSO_PASSWORD;
 export const PAYSTACK_SECRET_KEY = env.PAYSTACK_SECRET_KEY;
 export const BACKEND_BASE_URL = env.BACKEND_BASE_URL;
-export const FRONTEND_URL = env.FRONTEND_URL;
 export const FLUTTERWAVE_SECRET_KEY = env.FLUTTERWAVE_SECRET_KEY;
 export const KORAPAY_SECRET_KEY = env.KORAPAY_SECRET_KEY;
 export const MONIFY_API_KEY = env.MONIFY_API_KEY;
@@ -45,4 +48,9 @@ export const MONIFY_SECRET_KEY = env.MONIFY_SECRET_KEY;
 export const MERCHANT_API_KEY_ENCRYPTION_SECRET = env.MERCHANT_API_KEY_ENCRYPTION_SECRET;
 export const SEERBIT_PUBLIC_KEY = env.SEERBIT_PUBLIC_KEY;
 export const SEERBIT_SECRET_KEY = env.SEERBIT_SECRET_KEY;
+export const R2_BUCKET_NAME = env.R2_BUCKET_NAME; 
+export const R2_ACCESS_KEY_ID = env.R2_ACCESS_KEY_ID;
+export const R2_SECRET_ACCESS_KEY = env.R2_SECRET_ACCESS_KEY;
+export const R2_ENDPOINT_URL = env.R2_ENDPOINT_URL;
+export const SQLITE_FILE = env.SQLITE_FILE;
 
