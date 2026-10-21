@@ -6,6 +6,7 @@ class CustomerService {
 
     async get_customer(payload: Pick<CustomerInterface, "email" | "merchant_id">){
 
+        payload.email = payload.email.toLowerCase();
         const { email, merchant_id } = payload;
         const existing_customer = await customer_repo.find({email, merchant_id});
 
