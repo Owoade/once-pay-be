@@ -22,7 +22,7 @@ class PaystackService implements PaymentService {
             `${this.base_url}/transaction/initialize`,
             {
                 email: payload.email,
-                amount: payload.amount,
+                amount: payload.amount * 100,
                 reference: payload.internal_trx_reference,
                 callback_url: `${BACKEND_BASE_URL}/transaction/callback/${this.provider_name}/${payload.internal_trx_reference}`,
                 ...(payload.metadata ? { metadata: payload.metadata } : {})
