@@ -10,7 +10,7 @@ class MonifyService implements PaymentService {
     private base_url = "https://sandbox.monnify.com/api"
     private api_key = MONIFY_API_KEY
     private secret_key = MONIFY_SECRET_KEY
-    private provider_name = "monify"
+    private provider_name = "monnify"
 
     constructor() {
         this.initiate_transaction = this.initiate_transaction.bind(this);
