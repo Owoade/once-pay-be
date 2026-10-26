@@ -65,8 +65,7 @@ class TransactionService {
         };
 
         await transaction_repo.create(trx)
-        await cache_repo.set(trx_reference, "TRANSACTION CALLBACK TIMEOUT", 60);
-
+        
         return { data: payment_data };
 
     }

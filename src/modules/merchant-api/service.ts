@@ -29,16 +29,6 @@ class MerchantApiService {
     }
 
     async verify_transaction_from_callback(params: { payment_gateway: string, trx_reference: string }): Promise<ServiceMethodReturnType<TransactionInterface>> {
-        const CALLBACK_PERIOD_HAS_PASSED = (await cache_repo.get(params.trx_reference)) === null;
-        if(CALLBACK_PERIOD_HAS_PASSED){
-            return {
-                error: {
-                    message: "Transaction is invalid or already resolved",
-                    code: 408
-                }
-            };
-        }
-
         const response = await transaction_service.verify_transaction({
             payment_gateway: params.payment_gateway as any,
             reference: params.trx_reference

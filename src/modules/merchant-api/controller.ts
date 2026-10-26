@@ -8,6 +8,7 @@ import merchant_api_service from "./service.js";
 import respond from "@utils/respond";
 import { TransactionInterface } from "@modules/core/transaction/type";
 import transaction_service from "@modules/core/transaction/service";
+import { FRONTEND_URL } from "@env/index.js";
 
 @ServiceDecorator.forMerchantApiKeyValidation()
 class MerchantApiController {
@@ -70,10 +71,6 @@ class MerchantApiController {
             trx_reference: params.trx_reference
         })
 
-        if(response.data?.callback_url){
-            return res.redirect(response.data.callback_url);
-        }
-
         if(response.error){
             return respond(res, {
                 status: 'error',
@@ -82,14 +79,13 @@ class MerchantApiController {
             });
         }
 
-        if(response.data)
-            response.data = transaction_service.sanitize_transaction(response.data) as TransactionInterface;
-            
-        return respond(res, {
-            status: 'success',
-            data: response.data,
-            status_code: 200
-        });
+        if(response.data?.callback_url){
+            res.redirect(response.data.callback_url);
+        }
+
+        else {
+            res.redirect(`${FRONTEND_URL}/void`)
+        }
     }
 
     @ServiceDecorator.forRequestPayloadValidation(id_validator_string("trx_reference"), "params")
